@@ -17,9 +17,8 @@ func Init() *Parser {
 	return parser
 }
 
-// Map - Dumb command mapper.
-// TODO: Probably change it to use reflection (not sure how to do it in Go)
-func (p *Parser) Map(input string) *log.ApacheLog {
+// Map - Map log to ApacheLog.
+func (p *Parser) Map(input string) (*log.ApacheLog, error) {
 	input = strings.Trim(input, " \n\t")
 	re := regexp.MustCompile(`^(\S+)\s` + // RemoteHost
 		`(\S+)\s` + // RFC 1413 UserIdentifier
@@ -30,8 +29,7 @@ func (p *Parser) Map(input string) *log.ApacheLog {
 		`(\d+|-)`) // RequestSize Byte or "-" (Depend on %b or %B format)
 	matches := re.FindStringSubmatch(input)
 	if len(matches) < 1 {
-		fmt.Printf("[Warn] Failed to parse log, Ignoring: %s\n", input)
-		return nil
+		return nil, fmt.Errorf("failed to parse log, Ignoring: %s", input)
 	}
 
 	// Convert SizeByte
@@ -52,5 +50,5 @@ func (p *Parser) Map(input string) *log.ApacheLog {
 		SizeByte:    size,
 	}
 	p.Logs = append(p.Logs, log)
-	return log
+	return log, nil
 }
