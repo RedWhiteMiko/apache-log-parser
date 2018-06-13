@@ -38,15 +38,18 @@ func Parse(fileName string) error {
 		if file.isFailToFeedRover(log) {
 			fmt.Printf("Failed to feed Rover, %s\n", line)
 		}
+		if file.isPostBeforePut(log, file.parser.Logs) {
+			fmt.Printf("POST before PUT, %s\n", line)
+		}
 	}
 	return nil
 }
 
 func (f *File) isResponseBig(log *log.ApacheLog) bool {
 	if log.SizeByte > 100000 {
-		return false
+		return true
 	}
-	return true
+	return false
 }
 
 func (f *File) isFailToFeedRover(log *log.ApacheLog) bool {
@@ -60,5 +63,28 @@ func (f *File) isFailToFeedRover(log *log.ApacheLog) bool {
 	if log.StatusCode != "401" {
 		return false
 	}
+	return true
+}
+
+func (f *File) isPostBeforePut(log *log.ApacheLog, allLogs []*log.ApacheLog) bool {
+	if log.ReqMethod != "POST" {
+		return false
+	}
+	for i := len(allLogs) - 2; i >= 0; i-- {
+		prevLog := allLogs[i]
+		if prevLog.RemoteHost != log.RemoteHost {
+			continue
+		}
+		if prevLog.ReqResource != log.ReqResource {
+			continue
+		}
+		if prevLog.ReqMethod == "POST" {
+			return true
+		}
+		if prevLog.ReqMethod == "PUT" {
+			return false
+		}
+	}
+	// Could also means no PUT Found before POST
 	return true
 }
