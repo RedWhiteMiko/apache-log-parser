@@ -9,7 +9,7 @@ import (
 )
 
 type Parser struct {
-	log *log.ApacheLog
+	Logs []*log.ApacheLog
 }
 
 func Init() *Parser {
@@ -25,7 +25,7 @@ func (p *Parser) Map(input string) *log.ApacheLog {
 		`(\S+)\s` + // RFC 1413 UserIdentifier
 		`(\S+)\s` + // UserId
 		`\[(\d{2}/\w{3}/\d{2}(?:\d{2}:){3}\d{2} [-+]\d{4})\]\s` + // Date [10/Oct/2000:13:55:36 -0700]
-		`"(.*)\s(.*)\s(.*)"\s` + // Request
+		`"(.+?)(?:\s)(.+)\s(.*)"\s` + // Request
 		`(\d+)\s` + // StatusCode
 		`(\d+|-)`) // RequestSize Byte or "-" (Depend on %b or %B format)
 	matches := re.FindStringSubmatch(input)
@@ -51,6 +51,6 @@ func (p *Parser) Map(input string) *log.ApacheLog {
 		StatusCode:  matches[8],
 		SizeByte:    size,
 	}
-	fmt.Println(len(matches), log)
-	return p.log
+	p.Logs = append(p.Logs, log)
+	return log
 }
