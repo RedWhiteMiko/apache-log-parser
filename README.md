@@ -30,6 +30,7 @@ Tested environment: Linux Fedora 25
 - In case logs unable to be parsed, it will be ignored
 - In case `POST` doesn't find `PUT` before the logs, test `3. PUT before POST` will `Fail`
 - For test `4. Suspicious activity`, `The log must have less than five 401 responses from any host` assumed as `Log must have less than five 401 responses from each Remote Hosts`
+- Input log is a file, not stdin
 
 ## Reference Links
 - http://httpd.apache.org/docs/current/logs.html#common
