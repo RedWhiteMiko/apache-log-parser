@@ -9,13 +9,15 @@ import (
 )
 
 type File struct {
-	parser *parser.Parser
+	parser              *parser.Parser
+	hostSuspiciousCount map[string]int
 }
 
 // Parse - Parse file to command
 func Parse(fileName string) error {
 	file := new(File)
 	file.parser = parser.Init()
+	file.hostSuspiciousCount = make(map[string]int)
 
 	f, err := os.Open(fileName)
 	if err != nil {
@@ -40,6 +42,9 @@ func Parse(fileName string) error {
 		}
 		if file.isPostBeforePut(log, file.parser.Logs) {
 			fmt.Printf("POST before PUT, %s\n", line)
+		}
+		if file.isSuspiciousActivity(log) {
+			fmt.Printf("Is suspicious, %s\n", line)
 		}
 	}
 	return nil
@@ -87,4 +92,15 @@ func (f *File) isPostBeforePut(log *log.ApacheLog, allLogs []*log.ApacheLog) boo
 	}
 	// Could also means no PUT Found before POST
 	return true
+}
+
+func (f *File) isSuspiciousActivity(log *log.ApacheLog) bool {
+	if log.StatusCode != "401" {
+		return false
+	}
+	f.hostSuspiciousCount[log.RemoteHost]++
+	if f.hostSuspiciousCount[log.RemoteHost] >= 5 {
+		return true
+	}
+	return false
 }
