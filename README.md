@@ -31,6 +31,7 @@ Tested environment: Linux Fedora 25
 - In case `POST` doesn't find `PUT` before the logs, test `3. PUT before POST` will `Fail`
 - For test `4. Suspicious activity`, `The log must have less than five 401 responses from any host` assumed as `Log must have less than five 401 responses from each Remote Hosts`
 - Input log is a file, not stdin
+- By default, script will return Exit(2) if one of the test fail, to continue without exiting, please set `is_exit_of_fail` to `False`
 
 ## Reference Links
 - http://httpd.apache.org/docs/current/logs.html#common
