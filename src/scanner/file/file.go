@@ -14,7 +14,7 @@ type File struct {
 }
 
 // Parse - Parse file to command
-func Parse(fileName string) error {
+func Parse(fileName string, isExitOnFail bool) error {
 	file := new(File)
 	file.parser = parser.Init()
 	file.hostSuspiciousCount = make(map[string]int)
@@ -36,18 +36,28 @@ func Parse(fileName string) error {
 		}
 		if file.isResponseBig(log) {
 			fmt.Printf("Response is too big, %s\n", line)
+			file.exitOnFail(isExitOnFail)
 		}
 		if file.isFailToFeedRover(log) {
 			fmt.Printf("Failed to feed Rover, %s\n", line)
+			file.exitOnFail(isExitOnFail)
 		}
 		if file.isPostBeforePut(log, file.parser.Logs) {
 			fmt.Printf("POST before PUT, %s\n", line)
+			file.exitOnFail(isExitOnFail)
 		}
 		if file.isSuspiciousActivity(log) {
 			fmt.Printf("Is suspicious, %s\n", line)
+			file.exitOnFail(isExitOnFail)
 		}
 	}
 	return nil
+}
+
+func (f *File) exitOnFail(isExitOnFail bool) {
+	if isExitOnFail {
+		os.Exit(2)
+	}
 }
 
 func (f *File) isResponseBig(log *log.ApacheLog) bool {
